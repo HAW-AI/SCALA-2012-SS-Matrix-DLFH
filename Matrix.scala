@@ -48,12 +48,12 @@ object Matrix extends App{
 	    }
         
 	    import java.util.concurrent._
-	    def xpar(mat: Matrix[N], threadMulti:Double, enforceMulti:Boolean = false) = {
+	    def xpar(mat: Matrix[N], threadMulti:Double = 0) = {
 	        if (offset > 0 && offset == (mat.elements.length/offset)) {
 		        val dim = offset*offset
-		        val definedThreads = (Runtime.getRuntime().availableProcessors() * threadMulti).toInt
+		        val definedThreads = if((Runtime.getRuntime().availableProcessors() * threadMulti).toInt > 0) (Runtime.getRuntime().availableProcessors() * threadMulti).toInt else 1
 		        val matrixThreadRatio = dim / definedThreads
-		        val neededThreads = if(!enforceMulti && (1 <= matrixThreadRatio))  definedThreads else dim
+		        val neededThreads = if(matrixThreadRatio >=1 )  definedThreads else dim
 		        val tasksPerThread = (matrixThreadRatio + 1).abs
 		        val collect = scala.collection.mutable.IndexedSeq.fill[N](dim)(implicitly[Numeric[N]].zero)
 		        val Threads = for {threadCounter <- 0 to neededThreads - 1
@@ -183,9 +183,9 @@ object Matrix extends App{
 	val mmul5 = Matrix(2)(1,2,2,1)
 	val mmul6 = Matrix(2)(2,3,3,2)
 	
-	measureTime(mmul3 xpar (mmul4, 1), 3)
+//	measureTime(mmul5 xpar (mmul6, 1), 3)
 	measureTime(mmul3 x mmul4, 3)
-	measureTime(mmul3 xpar (mmul4, 1), 0)
+	measureTime(mmul3 xpar (mmul4, 1), 3)
 //	measureTime(mmul3 xpar (mmul4, 2), 2)
 
 //	measureTime(mmul3 xpar (mmul4, 1), 3)
